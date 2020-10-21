@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomDateParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Feedback Manager</a> &gt; <a href="index.source.html" class="el_package">gov.gsa.sam.utilities</a> &gt; <span class="el_source">CustomDateParser.java</span></div><h1>CustomDateParser.java</h1><pre class="source lang-java linenums">package gov.gsa.sam.utilities;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+<span class="nc" id="L11">public class CustomDateParser {</span>
+<span class="fc" id="L12">    private static final List&lt;String&gt; formats = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L13">    private static final Logger log = LoggerFactory.getLogger(CustomDateParser.class);</span>
+    static{
+<span class="fc" id="L15">        formats.add(&quot;yyyy-MM-dd HH:mm:ss&quot;);</span>
+<span class="fc" id="L16">        formats.add(&quot;yyyy-MM-dd&quot;);</span>
+<span class="fc" id="L17">        formats.add(&quot;yyyy-MM-dd HH:mm a&quot;);</span>
+<span class="fc" id="L18">        formats.add(&quot;EEE MMM d HH:mm:ss z yyyy&quot;);</span>
+<span class="fc" id="L19">        formats.add(&quot;yyyy-MM-dd'T'HH:mm:ss.SSS z&quot;);</span>
+<span class="fc" id="L20">   }</span>
+
+    public static Date parse(String dateValue) {
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        for(String candidateFormat: formats) {</span>
+<span class="fc" id="L24">            Date date = parseDate(dateValue, candidateFormat);</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">            if (date != null) {</span>
+<span class="fc" id="L26">                return date;</span>
+            }
+<span class="fc" id="L28">        }</span>
+<span class="nc" id="L29">        return null;</span>
+    }
+
+    private static Date parseDate(String dateCandidate, String dateFormat) {
+        try {
+<span class="fc" id="L34">            return new SimpleDateFormat(dateFormat).parse(dateCandidate);</span>
+<span class="fc" id="L35">        } catch (Exception e) {</span>
+<span class="fc" id="L36">        	log.error(&quot;Error parsing date &quot; + dateCandidate + &quot; Date Formate&quot; + dateFormat ,e);</span>
+<span class="fc" id="L37">            return null;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.0.201801022044</span></div></body></html>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Question.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Feedback Manager</a> &gt; <a href="index.source.html" class="el_package">gov.gsa.sam.domain</a> &gt; <span class="el_source">Question.java</span></div><h1>Question.java</h1><pre class="source lang-java linenums">package gov.gsa.sam.domain;
+
+import java.sql.Timestamp;
+
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import gov.gsa.sam.utilities.CustomTimestampDeserializer;
+import gov.gsa.sam.utilities.CustomTimestampSerializer;
+
+/**
+ * 
+ * @author Nithin.Emanuel
+ *
+ */
+
+@Entity
+@Table(name=&quot;question&quot;)
+@Embeddable
+@Relation(collectionRelation = &quot;questionList&quot;)
+<span class="fc" id="L34">public class Question extends RepresentationModel&lt;Question&gt; {</span>
+	
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column(name=&quot;question_id&quot;)
+	private Long questionId;
+	
+	@Column(name=&quot;question_desc&quot;)
+	private String questionDesc;
+	
+	@JsonSerialize(using = CustomTimestampSerializer.class)
+	@JsonDeserialize(using = CustomTimestampDeserializer.class)
+	@Column(name=&quot;created_date&quot;)
+	private Timestamp createdDate;
+	
+	@Column(name=&quot;created_by&quot;)
+	private String createdBy;
+	
+	@Column(name=&quot;last_modified_by&quot;)
+	private String lastModifiedBy;
+	
+	@JsonSerialize(using = CustomTimestampSerializer.class)
+	@JsonDeserialize(using = CustomTimestampDeserializer.class)
+	@Column(name=&quot;last_modified_date&quot;)
+	private Timestamp lastModifiedDate;
+	
+	@JsonProperty(&quot;question_options&quot;)
+	@Column(name= &quot;question_options&quot;)
+	@Convert(converter=QuestionContentCoverter.class)
+	private QuestionContent questionOptions;
+	
+	private String status;
+
+	public String getStatus() {
+<span class="nc" id="L69">		return status;</span>
+	}
+
+	public void setStatus(String status) {
+<span class="fc" id="L73">		this.status = status;</span>
+<span class="fc" id="L74">	}</span>
+
+	public Long getQuestionId() {
+<span class="fc" id="L77">		return questionId;</span>
+	}
+
+	public void setQuestionId(Long questionId) {
+<span class="fc" id="L81">		this.questionId = questionId;</span>
+<span class="fc" id="L82">	}</span>
+
+	public String getQuestionDesc() {
+<span class="fc" id="L85">		return questionDesc;</span>
+	}
+
+	public void setQuestionDesc(String questionDesc) {
+<span class="fc" id="L89">		this.questionDesc = questionDesc;</span>
+<span class="fc" id="L90">	}</span>
+
+	public Timestamp getCreatedDate() {
+<span class="nc" id="L93">		return createdDate;</span>
+	}
+
+	public void setCreatedDate(Timestamp createdDate) {
+<span class="fc" id="L97">		this.createdDate = createdDate;</span>
+<span class="fc" id="L98">	}</span>
+
+	public String getCreatedBy() {
+<span class="nc" id="L101">		return createdBy;</span>
+	}
+
+	public void setCreatedBy(String createdBy) {
+<span class="fc" id="L105">		this.createdBy = createdBy;</span>
+<span class="fc" id="L106">	}</span>
+
+	public String getLastModifiedBy() {
+<span class="nc" id="L109">		return lastModifiedBy;</span>
+	}
+
+	public void setLastModifiedBy(String lastModifiedBy) {
+<span class="fc" id="L113">		this.lastModifiedBy = lastModifiedBy;</span>
+<span class="fc" id="L114">	}</span>
+
+	public Timestamp getLastModifiedDate() {
+<span class="nc" id="L117">		return lastModifiedDate;</span>
+	}
+
+	public void setLastModifiedDate(Timestamp lastModifiedDate) {
+<span class="fc" id="L121">		this.lastModifiedDate = lastModifiedDate;</span>
+<span class="fc" id="L122">	}</span>
+
+	public QuestionContent getQuestionOptions() {
+<span class="fc" id="L125">		return questionOptions;</span>
+	}
+
+	public void setQuestionOptions(QuestionContent questionOptions) {
+<span class="fc" id="L129">		this.questionOptions = questionOptions;</span>
+<span class="fc" id="L130">	}		</span>
+	
+	@Override
+	public int hashCode() {
+<span class="fc" id="L134">	  return System.identityHashCode(this);</span>
+	}
+	public boolean equals(Object object) {        
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">	 return this==object;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.0.201801022044</span></div></body></html>

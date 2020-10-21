@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExportFeedbackScheduler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Feedback Manager</a> &gt; <a href="index.source.html" class="el_package">gov.gsa.sam.scheduler</a> &gt; <span class="el_source">ExportFeedbackScheduler.java</span></div><h1>ExportFeedbackScheduler.java</h1><pre class="source lang-java linenums">package gov.gsa.sam.scheduler;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import gov.gsa.sam.domain.Feedback;
+import gov.gsa.sam.service.FeedbackService;
+import gov.gsa.sam.service.MailSenderService;
+import gov.gsa.sam.utilities.ExportXLSUtil;
+
+@Component
+<span class="fc" id="L24">public class ExportFeedbackScheduler {</span>
+
+<span class="fc" id="L26">	private static final Logger log = LoggerFactory.getLogger(ExportFeedbackScheduler.class);</span>
+<span class="fc" id="L27">	public static final String CURR_PATH = System.getProperty(&quot;user.dir&quot;);</span>
+
+	@Autowired
+	private FeedbackService feedbackService;
+
+	@Autowired
+	private MailSenderService mailSenderService;
+
+	@Autowired
+	private ExportXLSUtil exportXLSUtil;
+
+	@Resource
+	Environment environment;
+
+	// Scheduled at 9:55 pm
+	@Scheduled(cron = &quot;0 55 21 * * ?&quot;, zone = &quot;America/New_York&quot;)
+	public void exportFeedbackAndSendEmail() {
+<span class="fc" id="L44">		SimpleDateFormat FORMATTER = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;);</span>
+<span class="fc" id="L45">		log.info(&quot;Export feedback job started for &quot; + FORMATTER.format(new Date()));</span>
+
+<span class="fc" id="L47">		String FILE_NAME = CURR_PATH + environment.getProperty(&quot;excel.path&quot;) + FORMATTER.format(new Date()) + &quot;.XLSX&quot;;</span>
+
+		try {
+			// Get All feedbacks from DB
+<span class="fc" id="L51">			List&lt;Feedback&gt; feedbackList = getAllFeedbacks();</span>
+
+			// Export data to XLS
+<span class="fc" id="L54">			String completeFileName = exportXLSUtil.exportXLS(feedbackList);</span>
+<span class="fc" id="L55">			String toAddressArray = environment.getProperty(&quot;mailing.to.list&quot;);</span>
+<span class="fc" id="L56">			String mailSubject = environment.getProperty(&quot;mailing.subject&quot;) + &quot; | &quot; + System.getenv(&quot;DEPLOY_ENV&quot;);</span>
+<span class="fc" id="L57">			String mailDetails = environment.getProperty(&quot;mailing.text&quot;) + FORMATTER.format(new Date()) + &quot;\n &quot;</span>
+<span class="fc" id="L58">					+ environment.getProperty(&quot;mailing.text1&quot;) + feedbackList.size() + &quot;\n&quot;</span>
+<span class="fc" id="L59">					+ environment.getProperty(&quot;mailing.footer.message&quot;);</span>
+
+			// Send Email Notification
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">			if (!completeFileName.isEmpty()) {</span>
+<span class="fc" id="L63">				String[] toAddress = toAddressArray.split(&quot;,&quot;);</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">				for (String to : toAddress) {</span>
+<span class="fc" id="L65">					mailSenderService.sendMailMessage(to, mailSubject, mailDetails, completeFileName);</span>
+				}
+			}
+
+<span class="fc" id="L69">			File file = new File(FILE_NAME);</span>
+
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">			if (file.delete()) {</span>
+<span class="nc" id="L72">				log.info(file.getName() + &quot; is deleted!&quot;);</span>
+			} else {
+<span class="fc" id="L74">				log.info(&quot;Delete operation is failed.&quot;);</span>
+			}
+<span class="nc" id="L76">		} catch (Exception e) {</span>
+<span class="nc" id="L77">			log.warn(&quot;Following Exception Occured::&quot; + e);</span>
+<span class="fc" id="L78">		}</span>
+
+<span class="fc" id="L80">	}</span>
+
+	public List&lt;Feedback&gt; getAllFeedbacks() {
+		// Getting all the list of Feedbacks from database
+<span class="fc" id="L84">		List&lt;Feedback&gt; listOfFeedbacks = new ArrayList&lt;&gt;();</span>
+		try {
+<span class="fc" id="L86">			listOfFeedbacks = feedbackService.getAllFeedbackReport();</span>
+<span class="nc" id="L87">		} catch (Exception e) {</span>
+<span class="nc" id="L88">			log.warn(&quot;Following Exception Occured::&quot; + e);</span>
+<span class="fc" id="L89">		}</span>
+<span class="fc" id="L90">		return listOfFeedbacks;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.0.201801022044</span></div></body></html>

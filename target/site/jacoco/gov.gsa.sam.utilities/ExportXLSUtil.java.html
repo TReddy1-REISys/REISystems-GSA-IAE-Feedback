@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExportXLSUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Feedback Manager</a> &gt; <a href="index.source.html" class="el_package">gov.gsa.sam.utilities</a> &gt; <span class="el_source">ExportXLSUtil.java</span></div><h1>ExportXLSUtil.java</h1><pre class="source lang-java linenums">package gov.gsa.sam.utilities;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+import gov.gsa.sam.domain.Feedback;
+import gov.gsa.sam.domain.Question;
+import gov.gsa.sam.exception.BaseApplicationException;
+import gov.gsa.sam.service.QuestionService;
+
+@Component
+<span class="fc" id="L36">public class ExportXLSUtil {</span>
+
+	@Resource
+	private Environment environment;
+
+	@Autowired
+	private QuestionService questionService;
+
+<span class="fc" id="L44">	private static final Logger log = LoggerFactory.getLogger(ExportXLSUtil.class);</span>
+
+<span class="fc" id="L46">	public static final String CURR_PATH = System.getProperty(&quot;user.dir&quot;);</span>
+	public static final String EXT_NAME = &quot;.XLSX&quot;;
+
+	public String exportXLS(List&lt;Feedback&gt; feedbackList) {
+<span class="fc" id="L50">		log.info(&quot;Number of Feedback Records are &quot; + feedbackList.size());</span>
+<span class="fc" id="L51">		String FILE_NAME = CURR_PATH + environment.getProperty(&quot;excel.path&quot;);</span>
+<span class="fc" id="L52">		SimpleDateFormat FORMATTER = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;);</span>
+
+		// Creating HashMap to get the question description
+<span class="fc" id="L55">		HashMap&lt;Long, String&gt; questionHashMap = new HashMap&lt;&gt;();</span>
+		List&lt;Question&gt; allquestions;
+		try {
+<span class="fc" id="L58">			allquestions = questionService.getAllQuestions();</span>
+<span class="fc" id="L59">			log.info(&quot;All questions retrieved from database &quot; + allquestions.size());</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">			for (Question ques : allquestions) {</span>
+<span class="fc" id="L61">				questionHashMap.put(ques.getQuestionId(), ques.getQuestionDesc());</span>
+<span class="fc" id="L62">			}</span>
+<span class="nc" id="L63">		} catch (BaseApplicationException e1) {</span>
+			// TODO Auto-generated catch block
+<span class="nc" id="L65">			log.error(&quot;Error retrieving questions from database &quot; + e1);</span>
+<span class="fc" id="L66">		}</span>
+
+		String completeFileName;
+<span class="fc" id="L69">		XSSFWorkbook workbook = new XSSFWorkbook();</span>
+<span class="fc" id="L70">		XSSFSheet sheet = workbook.createSheet(&quot;Feedback Data&quot;);</span>
+
+<span class="fc" id="L72">		sheet.setColumnWidth(0, 6000);</span>
+<span class="fc" id="L73">		sheet.setColumnWidth(1, 6000);</span>
+<span class="fc" id="L74">		sheet.setColumnWidth(2, 10000);</span>
+<span class="fc" id="L75">		sheet.setColumnWidth(3, 10000);</span>
+<span class="fc" id="L76">		sheet.setColumnWidth(4, 6000);</span>
+<span class="fc" id="L77">		sheet.setColumnWidth(5, 6000);</span>
+<span class="fc" id="L78">		sheet.setColumnWidth(6, 6000);</span>
+<span class="fc" id="L79">		sheet.setColumnWidth(7, 6000);</span>
+
+<span class="fc" id="L81">		Font bold = workbook.createFont();</span>
+<span class="fc" id="L82">		bold.setBold(true);</span>
+<span class="fc" id="L83">		bold.setFontHeightInPoints((short) 10);</span>
+
+<span class="fc" id="L85">		Font normaltext = workbook.createFont();</span>
+<span class="fc" id="L86">		normaltext.setFontHeightInPoints((short) 10);</span>
+
+<span class="fc" id="L88">		CellStyle header = workbook.createCellStyle();</span>
+<span class="fc" id="L89">		header.setBorderBottom(BorderStyle.THIN);</span>
+<span class="fc" id="L90">		header.setBorderLeft(BorderStyle.THIN);</span>
+<span class="fc" id="L91">		header.setBorderRight(BorderStyle.THIN);</span>
+<span class="fc" id="L92">		header.setBorderTop(BorderStyle.THIN);</span>
+<span class="fc" id="L93">		header.setFont(bold);</span>
+<span class="fc" id="L94">		header.setWrapText(true);</span>
+<span class="fc" id="L95">		header.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());</span>
+<span class="fc" id="L96">		header.setFillPattern(FillPatternType.SOLID_FOREGROUND);</span>
+
+<span class="fc" id="L98">		CellStyle normal = workbook.createCellStyle();</span>
+<span class="fc" id="L99">		normal.setBorderBottom(BorderStyle.THIN);</span>
+<span class="fc" id="L100">		normal.setBorderLeft(BorderStyle.THIN);</span>
+<span class="fc" id="L101">		normal.setBorderRight(BorderStyle.THIN);</span>
+<span class="fc" id="L102">		normal.setBorderTop(BorderStyle.THIN);</span>
+<span class="fc" id="L103">		normal.setWrapText(true);</span>
+<span class="fc" id="L104">		normal.setFont(normaltext);</span>
+
+<span class="fc" id="L106">		int row = 0;</span>
+<span class="fc" id="L107">		int rowColumn = 0;</span>
+		// prepare headers for the XLSX
+<span class="fc" id="L109">		List&lt;String&gt; headerColumns = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L110">		headerColumns.add(&quot;FEEDBACK ID&quot;);</span>
+<span class="fc" id="L111">		headerColumns.add(&quot;FEEDBACK PATH&quot;);</span>
+<span class="fc" id="L112">		headerColumns.add(&quot;QUESTION&quot;);</span>
+<span class="fc" id="L113">		headerColumns.add(&quot;RESPONSE&quot;);</span>
+<span class="fc" id="L114">		headerColumns.add(&quot;QUESTION TYPE&quot;);</span>
+<span class="fc" id="L115">		headerColumns.add(&quot;USER ID&quot;);</span>
+<span class="fc" id="L116">		headerColumns.add(&quot;CREATE DATE&quot;);</span>
+
+<span class="fc" id="L118">		Row headerRow = sheet.createRow(row++);</span>
+		Cell cell;
+<span class="fc bfc" id="L120" title="All 2 branches covered.">		for (String headerColumn : headerColumns) {</span>
+<span class="fc" id="L121">			cell = headerRow.createCell(rowColumn++);</span>
+<span class="fc" id="L122">			cell.setCellValue(headerColumn);</span>
+<span class="fc" id="L123">			cell.setCellStyle(header);</span>
+<span class="fc" id="L124">		}</span>
+
+<span class="fc bfc" id="L126" title="All 2 branches covered.">		for (Feedback feedback : feedbackList) {</span>
+			// prepare the data for the XLSX
+<span class="fc" id="L128">			rowColumn = 0;</span>
+
+<span class="fc" id="L130">			Row dataRow = sheet.createRow(row++);</span>
+
+<span class="fc" id="L132">			cell = dataRow.createCell(rowColumn++);</span>
+<span class="fc" id="L133">			cell.setCellValue(feedback.getFeedbackId());</span>
+<span class="fc" id="L134">			cell.setCellStyle(normal);</span>
+
+<span class="fc" id="L136">			cell = dataRow.createCell(rowColumn++);</span>
+<span class="fc" id="L137">			cell.setCellValue(feedback.getFeedbackPath());</span>
+<span class="fc" id="L138">			cell.setCellStyle(normal);</span>
+
+<span class="fc" id="L140">			cell = dataRow.createCell(rowColumn++);</span>
+<span class="fc" id="L141">			cell.setCellValue(questionHashMap.get(feedback.getQuestionId()));</span>
+<span class="fc" id="L142">			cell.setCellStyle(normal);</span>
+
+<span class="fc" id="L144">			String feedbackResponse = &quot;No&quot;;</span>
+<span class="fc" id="L145">			String isSelected = null;</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">			if (!feedback.getFeedbackResponse().getSelected().isEmpty()</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">					&amp;&amp; feedback.getFeedbackResponse().getSelected() != null) {</span>
+<span class="fc" id="L148">				isSelected = StringUtils.join(feedback.getFeedbackResponse().getSelected(), &quot;,&quot;);</span>
+			}
+
+<span class="pc bpc" id="L151" title="2 of 4 branches missed.">			if (isSelected != null &amp;&amp; !&quot;&quot;.equals(isSelected)) {</span>
+<span class="fc" id="L152">				if ((environment.getProperty(&quot;final.question&quot;)</span>
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">						.equalsIgnoreCase(questionHashMap.get(feedback.getQuestionId())))</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">						&amp;&amp; (&quot;radio-text&quot;).equalsIgnoreCase(feedback.getFeedbackResponse().getType())) {</span>
+<span class="nc" id="L155">					feedbackResponse = &quot;Yes,&quot; + isSelected;</span>
+				} else {
+<span class="fc" id="L157">					feedbackResponse = isSelected;</span>
+				}
+			}
+
+<span class="fc" id="L161">			cell = dataRow.createCell(rowColumn++);</span>
+<span class="fc" id="L162">			cell.setCellValue(feedbackResponse);</span>
+<span class="fc" id="L163">			cell.setCellStyle(normal);</span>
+
+<span class="fc" id="L165">			cell = dataRow.createCell(rowColumn++);</span>
+<span class="fc" id="L166">			cell.setCellValue(feedback.getFeedbackResponse().getType());</span>
+<span class="fc" id="L167">			cell.setCellStyle(normal);</span>
+
+<span class="fc" id="L169">			cell = dataRow.createCell(rowColumn++);</span>
+<span class="fc" id="L170">			cell.setCellValue(feedback.getUserId());</span>
+<span class="fc" id="L171">			cell.setCellStyle(normal);</span>
+
+<span class="fc" id="L173">			cell = dataRow.createCell(rowColumn);</span>
+<span class="fc" id="L174">			cell.setCellValue(feedback.getCreatedDate().toString());</span>
+<span class="fc" id="L175">			cell.setCellStyle(normal);</span>
+<span class="fc" id="L176">		}</span>
+
+		try {
+<span class="fc" id="L179">			completeFileName = FILE_NAME + FORMATTER.format(new Date()) + EXT_NAME;</span>
+
+<span class="fc" id="L181">			log.info(&quot;Feedbacks Export File exported to &quot; + completeFileName);</span>
+<span class="fc" id="L182">			FileOutputStream outputStream = new FileOutputStream(completeFileName);</span>
+<span class="fc" id="L183">			workbook.write(outputStream);</span>
+<span class="fc" id="L184">			outputStream.close();</span>
+			// workbook.close();
+
+<span class="nc" id="L187">		} catch (FileNotFoundException e) {</span>
+<span class="nc" id="L188">			completeFileName = &quot;&quot;;</span>
+<span class="nc" id="L189">			log.warn(&quot;Following Exception Occured::&quot; + e);</span>
+<span class="nc" id="L190">		} catch (IOException e) {</span>
+<span class="nc" id="L191">			completeFileName = &quot;&quot;;</span>
+<span class="nc" id="L192">			log.warn(&quot;Following Exception Occured::&quot; + e);</span>
+<span class="pc" id="L193">		}</span>
+<span class="fc" id="L194">		return completeFileName;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.0.201801022044</span></div></body></html>

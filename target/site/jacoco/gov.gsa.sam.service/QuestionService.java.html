@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuestionService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Feedback Manager</a> &gt; <a href="index.source.html" class="el_package">gov.gsa.sam.service</a> &gt; <span class="el_source">QuestionService.java</span></div><h1>QuestionService.java</h1><pre class="source lang-java linenums">package gov.gsa.sam.service;
+
+import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import gov.gsa.sam.domain.Question;
+import gov.gsa.sam.exception.BaseApplicationException;
+import gov.gsa.sam.repository.QuestionRepository;
+import gov.gsa.sam.utilities.Constants;
+import gov.gsa.sam.utilities.Utility;
+
+/**
+ * @author Nithin.Emanuel Question Service Class
+ * 
+ */
+
+@Service
+<span class="fc" id="L27">public class QuestionService {</span>
+
+	@Autowired
+	private QuestionRepository quesRepo;
+
+	@Autowired
+	private Utility utility;
+
+<span class="fc" id="L35">	private static final Logger log = LoggerFactory.getLogger(QuestionService.class);</span>
+
+	/**
+	 * This method is used to fetch all questions from database
+	 *
+	 * @return List&lt;Question&gt;
+	 */
+	public List&lt;Question&gt; getAllQuestions() throws BaseApplicationException {
+<span class="fc" id="L43">		log.info(&quot;Service gets all the questions&quot;);</span>
+<span class="fc" id="L44">		List&lt;Question&gt; allQuestion = quesRepo.getAllQuestions();</span>
+<span class="fc" id="L45">		return allQuestion;</span>
+	}
+
+	/**
+	 * This method is used fetch question details for the provided question Id
+	 * 
+	 * @param questionId
+	 *            : Long
+	 * 
+	 * @return Question
+	 */
+	public Question getQuestion(Long questionId) throws BaseApplicationException {
+<span class="fc" id="L57">		log.info(&quot;Service gets question detail for &quot; + questionId);</span>
+<span class="fc" id="L58">		Question question = quesRepo.getQuestion(questionId);</span>
+<span class="fc" id="L59">		return question;</span>
+	}
+
+	/**
+	 * This method is used to fetch question details for all the provided question
+	 * Ids
+	 * 
+	 * @param questionIds
+	 * @param status
+	 * 
+	 * @return List&lt;Question&gt;
+	 */
+
+	public List&lt;Question&gt; getAllQuestions(String questionIds, String status) throws BaseApplicationException {
+<span class="fc" id="L73">		log.info(&quot;Service gets question details for following ids &quot; + questionIds);</span>
+
+<span class="fc" id="L75">		String validStatus = utility.isValidStatus(status);</span>
+
+<span class="fc" id="L77">		Set&lt;Long&gt; questions = null;</span>
+<span class="fc" id="L78">		List&lt;Question&gt; quesResult = null;</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">		if (StringUtils.isNotBlank(questionIds)) {</span>
+<span class="fc" id="L80">			questionIds = questionIds.replaceAll(&quot; &quot;, &quot;&quot;);</span>
+
+<span class="fc" id="L82">			String[] quess = questionIds.split(&quot;,&quot;);</span>
+<span class="fc" id="L83">			questions = new HashSet&lt;Long&gt;();</span>
+
+<span class="fc bfc" id="L85" title="All 2 branches covered.">			for (String ques : quess) {</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">				if (StringUtils.isNumeric(ques)) {</span>
+<span class="fc" id="L87">					questions.add(Long.parseLong(ques));</span>
+				}
+			}
+		}
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">		if (questions == null) {</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">			if (StringUtils.isNotBlank(validStatus)) {</span>
+<span class="nc" id="L93">				quesResult = quesRepo.getQuestionsByStatus(validStatus);</span>
+			} else {
+<span class="nc" id="L95">				quesResult = quesRepo.getAllQuestions();</span>
+			}
+		} else {
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">			if (StringUtils.isNotBlank(validStatus)) {</span>
+<span class="nc" id="L99">				quesResult = quesRepo.getQuestionsByStatusAndIds(questions, validStatus);</span>
+			} else {
+<span class="fc" id="L101">				quesResult = quesRepo.getAllQuestionsForIds(questions);</span>
+			}
+		}
+
+<span class="fc" id="L105">		return quesResult;</span>
+	}
+
+	/**
+	 * This method used to Persist question to database
+	 * 
+	 * @param question
+	 * @return Question
+	 * @throws BaseApplicationException
+	 */
+	public Question createQuestion(Question question) throws BaseApplicationException {
+<span class="fc" id="L116">		Timestamp currTime = new Timestamp(System.currentTimeMillis());</span>
+<span class="fc" id="L117">		question.setCreatedBy(Constants.ADMIN);</span>
+<span class="fc" id="L118">		question.setLastModifiedBy(Constants.ADMIN);</span>
+<span class="fc" id="L119">		question.setCreatedDate(currTime);</span>
+<span class="fc" id="L120">		question.setLastModifiedDate(currTime);</span>
+
+<span class="fc" id="L122">		Question savedQuestion = new Question();</span>
+		try {
+<span class="fc" id="L124">			savedQuestion = quesRepo.saveAndFlush(question);</span>
+<span class="fc" id="L125">			log.info(&quot;Question successfully added ID &quot; + savedQuestion.getQuestionId());</span>
+<span class="fc" id="L126">		} catch (Exception e) {</span>
+<span class="fc" id="L127">			log.error(&quot;FeedBack- QuestionSErvice - Question Post error &quot;, e);</span>
+<span class="fc" id="L128">		}</span>
+<span class="fc" id="L129">		return savedQuestion;</span>
+	}
+
+	/**
+	 * This method is used to update a question
+	 * 
+	 * @param question
+	 * @return Question
+	 * @throws BaseApplicationException
+	 */
+	public Question updateQuestion(Question question) throws BaseApplicationException {
+<span class="fc" id="L140">		Timestamp currTime = new Timestamp(System.currentTimeMillis());</span>
+
+<span class="fc" id="L142">		Optional&lt;Question&gt; optQues = quesRepo.findById(question.getQuestionId());</span>
+
+<span class="fc" id="L144">		Question dbQuestion = null;</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">		if (optQues.isPresent()) {</span>
+<span class="fc" id="L146">			dbQuestion = optQues.get();</span>
+		}
+
+		Question savedQuestion;
+
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">		if (dbQuestion != null) {</span>
+<span class="fc" id="L152">			dbQuestion.setLastModifiedBy(Constants.ADMIN);</span>
+<span class="fc" id="L153">			dbQuestion.setLastModifiedDate(currTime);</span>
+<span class="fc" id="L154">			dbQuestion.setQuestionDesc(question.getQuestionDesc());</span>
+<span class="fc" id="L155">			dbQuestion.setQuestionOptions(question.getQuestionOptions());</span>
+<span class="fc" id="L156">			savedQuestion = quesRepo.saveAndFlush(dbQuestion);</span>
+		} else {
+<span class="nc" id="L158">			log.info(&quot;The question for Id &quot; + question.getQuestionId() + &quot; is not found in DB!!&quot;);</span>
+<span class="nc" id="L159">			throw new BaseApplicationException(</span>
+<span class="nc" id="L160">					&quot;The question for Id &quot; + question.getQuestionId() + &quot; is not found in DB!!&quot;);</span>
+		}
+<span class="fc" id="L162">		log.info(&quot;Question Id &quot; + savedQuestion.getQuestionId() + &quot; was successfully updated&quot;);</span>
+
+<span class="fc" id="L164">		return savedQuestion;</span>
+	}
+
+	/**
+	 * This method is used to delete question from DB
+	 * 
+	 * @param questionId
+	 * @return String
+	 * @throws BaseApplicationException
+	 */
+	public String deleteQuestion(Long questionId) throws BaseApplicationException {
+		try {
+<span class="fc" id="L176">			quesRepo.deleteById(questionId);</span>
+<span class="fc" id="L177">			log.info(&quot;Question &quot; + questionId + &quot; Id successfully deleted from DB&quot;);</span>
+<span class="fc" id="L178">			return &quot;Successful&quot;;</span>
+<span class="nc" id="L179">		} catch (Exception e) {</span>
+<span class="nc" id="L180">			log.info(&quot;The question &quot; + questionId + &quot; Id couldn't be deleted &quot; + e.getMessage());</span>
+<span class="nc" id="L181">			log.info(&quot;The question &quot; + questionId + &quot; Id couldn't be deleted &quot;, e);</span>
+<span class="nc" id="L182">			return &quot;Failure&quot;;</span>
+		}
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.0.201801022044</span></div></body></html>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MailSenderService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Feedback Manager</a> &gt; <a href="index.source.html" class="el_package">gov.gsa.sam.service</a> &gt; <span class="el_source">MailSenderService.java</span></div><h1>MailSenderService.java</h1><pre class="source lang-java linenums">package gov.gsa.sam.service;
+
+import java.io.File;
+
+import javax.annotation.Resource;
+import javax.mail.internet.MimeMessage;
+
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.MimeMessagePreparator;
+import org.springframework.stereotype.Service;
+
+import gov.gsa.sam.exception.BaseApplicationException;
+
+@Service
+<span class="fc" id="L20">public class MailSenderService {</span>
+
+	@Autowired
+	private JavaMailSender mailSender;
+
+	@Resource
+	Environment environment;
+
+	// private static String fromAddress=&quot;no-reply-sam@gsa.gov&quot;;
+<span class="fc" id="L29">	private static final Logger logger = org.slf4j.LoggerFactory.getLogger(MailSenderService.class);</span>
+
+	/**
+	 * Configuration, and creating the mailSender object, is done the first time
+	 * the mail service is called.
+	 *
+	 *
+	 */
+	public void sendMailMessage(final String toAddress, final String emailSubject, final String emailText,
+			final String attachmentFilePath) throws BaseApplicationException {
+
+<span class="fc" id="L40">		String fromAddress = environment.getProperty(&quot;mailing.from.address&quot;);</span>
+
+<span class="fc" id="L42">		mailSender.send(new MimeMessagePreparator() {</span>
+
+			@Override
+			public void prepare(MimeMessage mimeMessage) throws Exception {
+<span class="nc" id="L46">				MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L47">				helper.addTo(toAddress);</span>
+<span class="nc" id="L48">				helper.setFrom(fromAddress);</span>
+<span class="nc" id="L49">				helper.setSubject(emailSubject);</span>
+<span class="nc" id="L50">				helper.setText(emailText);</span>
+
+<span class="nc" id="L52">				File file = new File(attachmentFilePath);</span>
+<span class="nc" id="L53">				FileSystemResource fileSystemResoure = new FileSystemResource(file);</span>
+<span class="nc" id="L54">				helper.addAttachment(file.getName(), fileSystemResoure);</span>
+<span class="nc" id="L55">			}</span>
+		});
+<span class="fc" id="L57">		logger.info(&quot;Email successfully sent to &quot; + toAddress);</span>
+<span class="fc" id="L58">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.0.201801022044</span></div></body></html>

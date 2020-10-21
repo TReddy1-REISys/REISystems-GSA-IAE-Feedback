@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FeedbackRestController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Feedback Manager</a> &gt; <a href="index.source.html" class="el_package">gov.gsa.sam.controller</a> &gt; <span class="el_source">FeedbackRestController.java</span></div><h1>FeedbackRestController.java</h1><pre class="source lang-java linenums">package gov.gsa.sam.controller;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import gov.gsa.sam.domain.Feedback;
+import gov.gsa.sam.domain.ResponseContent;
+import gov.gsa.sam.exception.BaseApplicationException;
+import gov.gsa.sam.scheduler.ExportFeedbackScheduler;
+import gov.gsa.sam.service.FeedbackService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@RestController
+@RequestMapping(value = FeedbackController.BASEPATH + &quot;/v1/feedback&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+// @Ta(tags = &quot;Feedback&quot;, description = &quot;Feedback Operations&quot;)
+@Tag(name = &quot;Feedback&quot;, description = &quot;Feedback Operations&quot;)
+<span class="fc" id="L47">public class FeedbackRestController {</span>
+
+<span class="fc" id="L49">	private static final Logger log = LoggerFactory.getLogger(FeedbackRestController.class);</span>
+
+	@Resource
+	Environment environment;
+
+	@Autowired
+	private FeedbackService feedbackService;
+
+	@Autowired
+	private ExportFeedbackScheduler exportFeedback;
+
+	/**
+	 * This method fetches all the feedback details from the Service
+	 * 
+	 * @param fIds
+	 * @return ResponseEntity&lt;CollectionModel&lt;Feedback&gt;&gt;
+	 * @throws BaseApplicationException
+	 */
+	@RequestMapping(method = RequestMethod.GET)
+	@Parameters({
+			@Parameter(name = &quot;fIds&quot;, description = &quot;Provide the feedback ids, comma separated&quot;, required = false),
+			@Parameter(name = &quot;fdate&quot;, description = &quot;Please provide date feedback was submitted in MM-dd-yyyy&quot;, required = false) })
+	@Operation(description = &quot;Fetch all feedback&quot;)
+	public ResponseEntity&lt;CollectionModel&lt;Feedback&gt;&gt; getAllFeedback(
+			@RequestParam(value = &quot;fIds&quot;, required = false) String fIds,
+			@RequestParam(value = &quot;fdate&quot;, required = false) String fdate) throws BaseApplicationException {
+<span class="fc" id="L75">		List&lt;Feedback&gt; feedbackList = new ArrayList&lt;Feedback&gt;();</span>
+
+		try {
+<span class="fc" id="L78">			Timestamp timestamp = null;</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">			if (StringUtils.isNotBlank(fdate)) {</span>
+<span class="nc" id="L80">				SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;MM-dd-yyyy&quot;);</span>
+<span class="nc" id="L81">				Date parsedDate = dateFormat.parse(fdate);</span>
+<span class="nc" id="L82">				timestamp = new Timestamp(parsedDate.getTime());</span>
+			}
+
+<span class="fc bfc" id="L85" title="All 2 branches covered.">			if (StringUtils.isNotBlank(fIds)) {</span>
+<span class="fc" id="L86">				feedbackList = feedbackService.getAllFeedback(fIds, timestamp);</span>
+			} else {
+<span class="fc" id="L88">				feedbackList = feedbackService.getAllFeedback(timestamp);</span>
+			}
+
+<span class="fc bfc" id="L91" title="All 2 branches covered.">			for (Feedback feedback : feedbackList) {</span>
+<span class="fc" id="L92">				feedback.add(linkTo(methodOn(FeedbackRestController.class)</span>
+<span class="fc" id="L93">						.getAllFeedback(String.valueOf(feedback.getFeedbackId()), fdate)).withSelfRel());</span>
+<span class="fc" id="L94">			}</span>
+<span class="fc" id="L95">			Link link = linkTo(methodOn(FeedbackRestController.class).getAllFeedback(fIds, fdate)).withSelfRel();</span>
+<span class="fc" id="L96">			CollectionModel&lt;Feedback&gt; resource = new CollectionModel&lt;Feedback&gt;(feedbackList, link);</span>
+
+<span class="fc" id="L98">			log.info(&quot;Get /&quot; + fIds + &quot;returns all the feedback details&quot;);</span>
+<span class="fc" id="L99">			return new ResponseEntity&lt;CollectionModel&lt;Feedback&gt;&gt;(resource, HttpStatus.OK);</span>
+<span class="fc" id="L100">		} catch (Exception e) {</span>
+			// TODO Auto-generated catch block
+<span class="fc" id="L102">			log.error(&quot;Error in fetching feedback details &quot;, e);</span>
+<span class="fc" id="L103">			return new ResponseEntity&lt;CollectionModel&lt;Feedback&gt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+	}
+
+	/**
+	 * This method returns the feedback details for the provided Id
+	 * 
+	 * @param fId
+	 * @return ResponseEntity&lt;Feedback&gt;
+	 * @throws BaseApplicationException
+	 */
+	@RequestMapping(value = &quot;/{fId}&quot;, method = RequestMethod.GET)
+	@Operation(description = &quot;Fetch question for questionId provided&quot;)
+	@Parameters({ @Parameter(name = &quot;fId&quot;, description = &quot;Provide feedback Id&quot;, in = ParameterIn.PATH) })
+	public ResponseEntity&lt;Feedback&gt; getFeedbackById(@PathVariable Long fId) throws BaseApplicationException {
+
+		try {
+<span class="fc" id="L120">			Feedback feedback = feedbackService.getFeedbackById(fId);</span>
+
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">			if (feedback != null) {</span>
+<span class="fc" id="L123">				feedback.add(linkTo(methodOn(FeedbackRestController.class).getFeedbackById(fId)).withSelfRel());</span>
+			}
+			// else {
+			// throw new BaseApplicationException(&quot;Record for feedbackID &quot; + fId
+			// + &quot; is not available&quot;);
+			// }
+
+<span class="fc" id="L130">			log.info(&quot;GET /&quot; + fId + &quot; return detail of the following id &quot; + fId);</span>
+<span class="fc" id="L131">			return new ResponseEntity&lt;Feedback&gt;(feedback, HttpStatus.OK);</span>
+<span class="fc" id="L132">		} catch (Exception e) {</span>
+			// TODO Auto-generated catch block
+<span class="fc" id="L134">			log.info(&quot;Error in getting feedback for &quot; + fId);</span>
+<span class="fc" id="L135">			log.error(&quot;FeedBackService - Error in getting feedback for : &quot;, e);</span>
+<span class="fc" id="L136">			return new ResponseEntity&lt;Feedback&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+	}
+
+	/**
+	 * This method is used to persist feedback to database
+	 * 
+	 * @param responseContent
+	 * @return
+	 * @throws BaseApplicationException
+	 */
+	@RequestMapping(method = RequestMethod.POST)
+	@Operation(description = &quot;Create all Feedbacks&quot;)
+	public ResponseEntity&lt;List&lt;Feedback&gt;&gt; createFeedback(@RequestBody ResponseContent responseContent,
+			HttpServletRequest req) throws BaseApplicationException {
+<span class="fc" id="L151">		List&lt;Feedback&gt; feedbackList = new ArrayList&lt;Feedback&gt;();</span>
+		try {
+<span class="fc" id="L153">			String ipAddress = req.getHeader(&quot;X-Forwarded-For&quot;);</span>
+<span class="fc" id="L154">			log.info(&quot;***ipAddress***&quot; + ipAddress + &quot;--&quot; + req.getHeader(&quot;X-Forwarded-For&quot;));</span>
+<span class="pc bpc" id="L155" title="2 of 4 branches missed.">			if (responseContent != null &amp;&amp; responseContent.getFeedbackList() != null</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">					&amp;&amp; responseContent.getFeedbackList().size() &gt; 0) {</span>
+<span class="fc" id="L157">				log.info(&quot;***ResponseContent 1***&quot;</span>
+<span class="fc" id="L158">						+ responseContent.getFeedbackList().get(0).getFeedbackResponse().getSelected().get(0));</span>
+			}
+<span class="pc bpc" id="L160" title="2 of 4 branches missed.">			if (responseContent != null &amp;&amp; responseContent.getFeedbackList() != null</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">					&amp;&amp; responseContent.getFeedbackList().size() &gt; 1) {</span>
+<span class="nc" id="L162">				log.info(&quot;***ResponseContent 2***&quot;</span>
+<span class="nc" id="L163">						+ responseContent.getFeedbackList().get(1).getFeedbackResponse().getSelected().get(0));</span>
+			}
+<span class="fc" id="L165">			feedbackList = feedbackService.createFeedback(responseContent);</span>
+<span class="fc" id="L166">			log.info(&quot;/Post Successful to post all the responses &quot;);</span>
+<span class="fc" id="L167">			return new ResponseEntity&lt;List&lt;Feedback&gt;&gt;(feedbackList, HttpStatus.CREATED);</span>
+<span class="fc" id="L168">		} catch (Exception e) {</span>
+<span class="fc" id="L169">			log.error(&quot;/Post Failure in posting all the responses &quot;, e);</span>
+<span class="fc" id="L170">			return new ResponseEntity&lt;List&lt;Feedback&gt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+	}
+
+	/**
+	 * This method is used to update feedback
+	 * 
+	 * @param feedbackId
+	 * @param feedback
+	 * @return ResponseEntity&lt;Feedback&gt;
+	 * @throws BaseApplicationException
+	 */
+	@RequestMapping(value = &quot;/{feedbackId}&quot;, method = RequestMethod.PUT)
+	@Operation(description = &quot;Update Feedback&quot;)
+	public ResponseEntity&lt;Feedback&gt; updateFeedback(@PathVariable Long feedbackId, @RequestBody Feedback feedback)
+			throws BaseApplicationException {
+		try {
+<span class="fc" id="L187">			Feedback savedFeedback = feedbackService.updateFeedback(feedbackId, feedback);</span>
+<span class="fc" id="L188">			log.info(&quot;/Put successfully updated feedback Id &quot; + feedbackId);</span>
+<span class="fc" id="L189">			return new ResponseEntity&lt;Feedback&gt;(savedFeedback, HttpStatus.OK);</span>
+<span class="fc" id="L190">		} catch (Exception e) {</span>
+			// TODO Auto-generated catch block
+<span class="fc" id="L192">			log.info(&quot;/Put Error in performing the update on feedback &quot; + feedbackId + &quot;  &quot; + e.getMessage());</span>
+<span class="fc" id="L193">			log.error(&quot;FeedBackServuce update Feedback Exception occured &quot;, e);</span>
+<span class="fc" id="L194">			return new ResponseEntity&lt;Feedback&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+
+	}
+
+	/**
+	 * This method is used to Delete feedback
+	 * 
+	 * @param feedbackId
+	 * @return ResponseEntity&lt;Object&gt;
+	 * @throws BaseApplicationException
+	 */
+	@RequestMapping(value = &quot;/{feedbackId}&quot;, method = RequestMethod.DELETE)
+	@Operation(description = &quot;Delete Feedback&quot;)
+	public ResponseEntity&lt;Object&gt; deleteFeedback(@PathVariable Long feedbackId) throws BaseApplicationException {
+
+		try {
+<span class="fc" id="L211">			String status = feedbackService.deleteFeedback(feedbackId);</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">			if ((&quot;Successful&quot;).equalsIgnoreCase(status)) {</span>
+<span class="fc" id="L213">				log.info(&quot;Successful in deleting Feedback Id &quot; + feedbackId);</span>
+<span class="fc" id="L214">				return new ResponseEntity&lt;Object&gt;(HttpStatus.OK);</span>
+			} else {
+<span class="fc" id="L216">				log.info(&quot;Feedback Id &quot; + feedbackId + &quot; wasnt found in DB&quot;);</span>
+<span class="fc" id="L217">				return new ResponseEntity&lt;Object&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+			}
+
+<span class="fc" id="L220">		} catch (Exception e) {</span>
+<span class="fc" id="L221">			log.info(&quot;Failure to delete the feedback Id &quot; + feedbackId + &quot; &quot; + e.getMessage());</span>
+<span class="fc" id="L222">			log.error(&quot;Failure to delete - logs &quot;, e);</span>
+<span class="fc" id="L223">			return new ResponseEntity&lt;Object&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+
+	}
+
+	@RequestMapping(value = &quot;/export&quot;, method = RequestMethod.GET)
+	public void exportXLS() {
+<span class="nc" id="L230">		exportFeedback.exportFeedbackAndSendEmail();</span>
+<span class="nc" id="L231">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.0.201801022044</span></div></body></html>
