@@ -1,0 +1,747 @@
+{
+	
+	"swagger": "2.0",
+	
+	"info": {
+		
+		"description": "The following are RESTFUL endpoints that will allow authorized users to retrieveand update information pertaining to feedback service",
+		
+		"version": "1.0.0",
+		
+		"title": "Feedback Service API",
+		
+		"license": {}
+		
+	},
+	
+	"host": "csp-api.sam.gov",
+	
+	"basePath": "/comp",
+	
+	"tags": [
+		
+		{
+			
+			"name": "Question",
+			
+			"description": "Question Rest Controller V 1"
+			
+		},
+		
+		{
+			
+			"name": "Feedback",
+			
+			"description": "Feedback Rest Controller V 1"
+			
+		}
+	],
+	"paths": {
+		"/feedback/v1/question/{qId}": {
+			"get": {
+				"tags": ["question-rest-controller-v-1"],
+				"summary": "Get Question by question id",
+				"description": "Get Question Details by Question Id",
+				"operationId": "getQuestionByIdUsingGet",
+				"consumes": [],
+				"produces": ["application/json,application/hal+json"],
+				"parameters": [{
+					"name": "qId",
+					"in": "path",
+					"description": "The question Id for which question details to be retrieved",
+					"required": true,
+					"type": "string"
+					}, {
+						"name": "api_key",
+						"in": "query",
+						"description": "API KEY",
+						"required": true,
+						"type": "string"
+					}],
+						"responses": {
+							"200": {
+								"description": "OK",
+								"schema": {
+									"$ref": "#/definitions/Question"
+								}
+							},
+							"204": {
+								"description": "No Content"
+							},
+							"401": {
+								"description": "Unauthorized"
+							},
+							"403": {
+								"description": "Forbidden"
+							},
+							"500": {
+								"description": "Internal Server Error"
+							}
+						}
+					}
+				},
+				"/feedback/v1/question": {
+					"get": {
+						"tags": ["question-rest-controller-v-1"],
+						"summary": "Get All Questions",
+						"description": "Returns all questions or questions specified in the query parameter",
+						"operationId": "getAllQuestionsUsingGET",
+						"consumes": [],
+						"produces": ["application/hal+json", "application/json"],
+						"parameters": [{
+							"name": "qIds",
+							"in": "query",
+							"description": "The question Id for which question details to be retrieved",
+							"required": false,
+							"type": "string"
+							}, {
+								"name": "api_key",
+								"in": "query",
+								"description": "API KEY",
+								"required": true,
+								"type": "string"
+							}],
+						"responses": {
+							"200": {
+								"description": "OK",
+								"schema": {
+									"$ref": "#/definitions/QuestionEmbedded"
+								}
+							},
+							"401": {
+								"description": "Unauthorized"
+							},
+							"403": {
+								"description": "Forbidden"
+							},
+							"404": {
+								"description": "Not Found"
+							},
+							"500" : {
+								"description" : "Internal Server Error"
+							}
+						}
+					}
+				},
+				"/feedback/v1/question ": {
+					"post": {
+						"tags": ["question-rest-controller-v-1"],
+						"summary": "Create a question",
+						"description": "Returns newly created question",
+						"operationId": "createQuestionUsingPOST",
+						"consumes": ["application/json"],
+						"produces": ["application/json"],
+						"parameters": [{
+							"in": "body",
+							"name": "question",
+							"description": "question",
+							"required": true,
+							"schema": {
+								"$ref": "#/definitions/Question"
+							}
+						},{
+							"name": "api_key",
+							"in": "query",
+							"description": "API KEY",
+							"required": true,
+							"type": "string"
+						}],
+							"responses": {
+								"201": {
+									"description": "Created",
+									"schema": {
+										"$ref": "#/definitions/Question"
+									}
+								},
+								"200": {
+									"description": "OK"
+								},
+								"401": {
+									"description": "Unauthorized"
+								},
+								"403": {
+									"description": "Forbidden"
+								},
+								"404": {
+									"description": "Not Found"
+								},
+								"500": {
+									"description": "Internal Server Error" 
+								} 
+							}
+						}
+					},
+					"/feedback/v1/question/": {
+						"put": {
+							"tags": ["question-rest-controller-v-1"],
+							"summary": "update the selected question",
+							"operationId": "updateQuestionUsingPUT",
+							"consumes": ["application/json"],
+							"produces": ["application/json"],
+							"parameters": [{
+								"in": "body",
+								"name": "question",
+								"description": "new updated question object",
+								"required": true,
+								"schema": {
+									"$ref": "#/definitions/Question"
+								}
+							},{
+								"name": "api_key",
+								"in": "query",
+								"description": "API KEY",
+								"required": true,
+								"type": "string"
+							}],
+								"responses": {
+									"201": {
+										"description": "Created",
+										"schema": {
+											"$ref": "#/definitions/Question"
+										}
+									},
+									"200": {
+										"description": "OK"
+									},
+									"401": {
+										"description": "Unauthorized"
+									},
+									"403": {
+										"description": "Forbidden"
+									},
+									"404": {
+										"description": "Not Found"
+									},
+									"500": {
+										"description": "Internal Server Error"
+									}
+								}
+							}
+						},
+						"/feedback/v1/question/{qId} ": {
+							"delete": {
+								"tags": ["question-rest-controller-v-1"],
+								"summary": "delete the selected question",
+								"operationId": "deleteQuestionUsingDelete",
+								"consumes": [],
+								"produces": [],
+								"parameters": [{
+									"in": "path",
+									"name": "qId",
+									"description": "Delete the question id provided as path variable",
+									"required": true,
+									"type": "string"
+									},{
+										"name": "api_key",
+										"in": "query",
+										"description": "API KEY",
+										"required": true,
+										"type": "string"
+									}],
+									"responses": {
+										"200": {
+											"description": "OK"
+										},
+										"201": {
+											"description": "Created"
+										},
+										"401": {
+											"description": "Unauthorized"
+										},
+										"403": {
+											"description": "Forbidden"
+										},
+										"404": {
+											"description": "Not Found"
+										},
+										"500": {
+											"description": "Internal Server Error"
+										}
+									}
+								}
+							},
+							"/feedback/v1/feedback/{fId}": {
+								"get": {
+									"tags": ["feedback-rest-controller-v-1"],
+									"summary": "Get Feedback by feedback id",
+									"description": "Get Feedback Details by Feedback Id",
+									"operationId": "getFeedbackByIdUsingGet",
+									"consumes": [],
+									"produces": ["application/json,application/hal+json"],
+									"parameters": [{
+										"name": "fId",
+										"in": "path",
+										"description": "The feedback Id for which feedback details to be retrieved",
+										"required": true,
+										"type": "string"
+										},{
+											"name": "api_key",
+											"in": "query",
+											"description": "API KEY",
+											"required": true,
+											"type": "string"
+										}],
+										"responses": {
+												"200": {
+													"description": "OK",
+													"schema": {
+														"$ref": "#/definitions/Feedback"
+													}
+												},
+												"204": {
+													"description": "No Content"
+												},
+												"401": {
+													"description": "Unauthorized"
+												},
+												"403": {
+													"description": "Forbidden"
+												},
+												"500": {
+													"description": "Internal Server Error"
+												}
+											}
+										}
+									},
+									"/feedback/v1/feedback": {
+										"get": {
+											"tags": ["feedback-rest-controller-v-1"],
+											"summary": "Get All Feedback Details",
+											"description": "Returns all feedbacks or feedbackss specified in the query parameter",
+											"operationId": "getAllFeedbacksUsingGET",
+											"consumes": [],
+											"produces": ["application/hal+json", "application/json"],
+											"parameters": [{
+												"name": "fIds",
+												"in": "query",
+												"description": "The feedback Ids for which feedback details to be retrieved",
+												"required": false,
+												"type": "string"
+												},{
+													"name": "api_key",
+													"in": "query",
+													"description": "API KEY",
+													"required": true,
+													"type": "string"
+												}],
+											"responses": {
+												"200": {
+													"description": "OK",
+													"schema": {
+														"$ref": "#/definitions/FeedbackEmbedded"
+													}
+												},
+												"401": {
+													"description": "Unauthorized"
+												},
+												"403": {
+													"description": "Forbidden"
+												},
+												"404": {
+													"description": "Not Found"
+												},
+												"500" : {
+													"description" : "Internal Server Error"
+												}
+											}
+										}
+									},
+									"/feedback/v1/feedback ": {
+										"post": {
+											"tags": ["feedback-rest-controller-v-1"],
+											"summary": "Create all feedback for a user",
+											"description": "Returns newly created feedback list",
+											"operationId": "createFeedbackUsingPOST",
+											"consumes": ["application/json"],
+											"produces": ["application/json"],
+											"parameters": [{
+												"in": "body",
+												"name": "feedbackList",
+												"description": "feedbackList",
+												"required": true,
+												"schema": {
+													"$ref": "#/definitions/FeedbackList"
+												}
+												},{
+													"name": "api_key",
+													"in": "query",
+													"description": "API KEY",
+													"required": true,
+													"type": "string"
+												}],
+												"responses": {
+													"201": {
+														"description": "Created",
+														"schema": {
+															"$ref": "#/definitions/FeedbackResponseList"
+														}
+													},
+													"200": {
+														"description": "Ok"
+													},
+													"401": {
+														"description": "Unauthorized"
+													},
+													"403": {
+														"description": "Forbidden"
+													},
+													"404": {
+														"description": "Not Found"
+													},
+													"500": {
+														"description": "Internal Server Error" 
+													} 
+												}
+											}
+										},
+										"/feedback/v1/feedback/{fId} ": {
+											"put": {
+												"tags": ["feedback-rest-controller-v-1"],
+												"summary": "update the selected feedback",
+												"operationId": "updateFeedbackUsingPUT",
+												"consumes": ["application/json"],
+												"produces": ["application/json"],
+												"parameters": [{
+													"in": "body",
+													"name": "feedback",
+													"description": "new updated feedback object",
+													"required": true,
+													"schema": {
+														"$ref": "#/definitions/Feedback"
+													 }
+													},{
+														"name": "fId",
+														"in": "path",
+														"description": "feedback Id",
+														"required": true,
+														"type": "string"
+													},{
+														"name": "api_key",
+														"in": "query",
+														"description": "API KEY",
+														"required": true,
+														"type": "string"
+													}],
+													"responses": {
+														"200": {
+															"description": "Ok",
+															"schema": {
+																"$ref": "#/definitions/Feedback"
+															}
+														},
+														"201": {
+															"description": "Created"
+														},
+														"401": {
+															"description": "Unauthorized"
+														},
+														"403": {
+															"description": "Forbidden"
+														},
+														"404": {
+															"description": "Not Found"
+														},
+														"500": {
+															"description": "Internal Server Error"
+														}
+													}
+												}
+											},
+											"/feedback/v1/feedback/{fId}  ": {
+												"delete": {
+													"tags": ["feedback-rest-controller-v-1"],
+													"summary": "delete the selected feedback",
+													"operationId": "deleteFeedbackUsingDelete",
+													"consumes": [],
+													"produces": [],
+													"parameters": [{
+														"in": "path",
+														"name": "fId",
+														"description": "Delete the feedback id provided as path variable",
+														"required": true,
+														"type": "string"
+														},{
+															"name": "api_key",
+															"in": "query",
+															"description": "API KEY",
+															"required": true,
+															"type": "string"
+														}],
+														"responses": {
+															"200": {
+																"description": "OK"
+															},
+															"201": {
+																"description": "Created"
+															},
+															"401": {
+																"description": "Unauthorized"
+															},
+															"403": {
+																"description": "Forbidden"
+															},
+															"404": {
+																"description": "Not Found"
+															},
+															"500": {
+																"description": "Internal Server Error"
+															}
+														}
+													}
+												}
+											},			
+											
+											"definitions": {
+												"Question": {
+													"type": "object",
+													"properties": {
+														"questionId": {
+															"type": "integer" 
+														},
+														"questionDesc": {
+															"type": "string"
+														},
+														"createdDate":{
+															"$ref": "#/definitions/Timestamp"
+														},
+														"question_options": {
+															"type" : "object",
+															"properties": {
+																"type" : {
+																	"type" : "string"
+																},
+																"options":{
+																	"type": "array",
+																	"items":{
+																		"type": "string"
+																	}
+																}
+															}
+														},
+														"createdBy": {
+															"type": "string"
+														},
+														"lastModifiedBy":{
+															"type": "string"
+														},
+														"lastModifiedDate":{
+															"$ref": "#/definitions/Timestamp"
+														},
+														"_links": {
+															"$ref": "#/definitions/Link"
+														}
+													}
+												},
+												"QuestionEmbedded" : {
+													"type" : "object",
+													"properties": {
+														"_embedded":{
+															"type" : "object",
+															"properties" : {
+																"questionList" : {
+																	"type" : "array",
+																	"items" : {
+																		"$ref": "#/definitions/Question"
+																	}
+																},
+																"_links" : {
+																	"$ref": "#/definitions/Link"
+																}
+															}
+														}
+													}
+												},
+												"Feedback": {
+													"type" : "object",
+													"properties" : {
+														"feedbackId" : {
+															"type" : "integer"
+														},
+														"questionId": {
+															"type" : "integer"
+														},
+														"userId":{
+															"type":"string"
+														},
+														"feedback_response":{
+															"type": "object",
+															"properties" : {
+																"type" : {
+																	"type" : "string"
+																},
+																"selected": "array",
+																"items" : {
+																	"type" : "string"
+																}
+															}
+														},
+														"createdDate":{
+															"$ref": "#/definitions/Timestamp" 
+														},
+														"createdBy": {
+															"type" : "string"
+														},
+														"lastModifiedDate":{
+															"$ref": "#/definitions/Timestamp"
+														},
+														"lastModifiedBy":{
+															"type":"string"
+														},
+														"_links":{
+															"$ref": "#/definitions/Link"
+														} 
+													}
+												},
+												"FeedbackEmbedded": {
+													"type" : "object",
+													"properties" : {
+														"_embedded" : {
+															"type" : "object",
+															"properties" : {
+																"feedbackList":{
+																	"type": "array",
+																	"items" : {
+																		"$ref": "#/definitions/Feedback"
+																	}
+																},
+																"_links":{
+																	"$ref": "#/definitions/Link"
+																}
+															}
+														}
+													}
+												},
+												"FeedbackList" : {
+													"type" : "object",
+													"properties" : {
+														"userId":{
+															"type" : "string"
+														},
+														"feedbackList":{
+															"type": "array",
+															"items": {
+																"$ref": "#/definitions/Feedback"
+															}
+														}
+													}
+												}, 
+												"FeedbackResponseList": {
+													"type" : "array",
+													"items": {
+														"$ref": "#/definitions/Feedback"
+													} 
+												},
+												"Timestamp": {
+													
+													"type": "object",
+													
+													"properties": {
+														
+														"date": {
+															
+															"type": "integer",
+															
+															"format": "int32"
+															
+														},
+														
+														"day": {
+															
+															"type": "integer",
+															
+															"format": "int32"
+															
+														},
+														
+														"hours": {
+															
+															"type": "integer",
+															
+															"format": "int32"
+															
+														},
+														
+														"minutes": {
+															
+															"type": "integer",
+															
+															"format": "int32"
+															
+														},
+														
+														"month": {
+															
+															"type": "integer",
+															
+															"format": "int32"
+															
+														},
+														
+														"nanos": {
+															
+															"type": "integer",
+															
+															"format": "int32"
+															
+														},
+														
+														"seconds": {
+															
+															"type": "integer",
+															
+															"format": "int32"
+															
+														},
+														
+														"time": {
+															
+															"type": "integer",
+															
+															"format": "int64"
+															
+														},
+														
+														"timezoneOffset": {
+															
+															"type": "integer",
+															
+															"format": "int32"
+															
+														},
+														
+														"year": {
+															
+															"type": "integer",
+															
+															"format": "int32"
+															
+														}
+														
+													}
+													
+												},
+												
+												"Link": {
+													
+													"type": "object",
+													
+													"properties": {
+														
+														"self": {
+															
+															"type": "object",
+															"properties": {
+																"href" : {
+																	"type" : "string"
+																}
+															}
+															
+														}
+														
+													}
+													
+												}
+												
+											}
+										}
+										
