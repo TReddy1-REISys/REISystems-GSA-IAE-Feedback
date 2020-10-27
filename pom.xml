@@ -246,25 +246,25 @@
 		</plugins>
 	</build>
 
-	<repositories>
-    	<repository> 
-			<id>MavenCentral</id> 
-			<url>http://repo1.maven.org/maven2/</url> 
-		</repository>
-		<repository>
-			<id>artifactory</id>
-			<url>https://artifactory.helix.gsa.gov/artifactory/GS-IAE-Maven/</url>
-		</repository>
-	</repositories>
+<!--	<repositories>-->
+<!--    	<repository>-->
+<!--			<id>MavenCentral</id>-->
+<!--			<url>http://repo1.maven.org/maven2/</url>-->
+<!--		</repository>-->
+<!--		<repository>-->
+<!--			<id>artifactory</id>-->
+<!--			<url>https://artifactory.helix.gsa.gov/artifactory/GS-IAE-Maven/</url>-->
+<!--		</repository>-->
+<!--	</repositories>-->
 
-	<pluginRepositories>
-		<pluginRepository> 
-			<id>MavenCentral</id> 
-			<url>http://repo1.maven.org/maven2/</url> 
-		</pluginRepository>
-		<pluginRepository>
-			<id>artifactory</id>
-			<url>https://artifactory.helix.gsa.gov/artifactory/GS-IAE-Maven/</url>
-		</pluginRepository>
-	</pluginRepositories>
+<!--	<pluginRepositories>-->
+<!--		<pluginRepository>-->
+<!--			<id>MavenCentral</id>-->
+<!--			<url>http://repo1.maven.org/maven2/</url>-->
+<!--		</pluginRepository>-->
+<!--		<pluginRepository>-->
+<!--			<id>artifactory</id>-->
+<!--			<url>https://artifactory.helix.gsa.gov/artifactory/GS-IAE-Maven/</url>-->
+<!--		</pluginRepository>-->
+<!--	</pluginRepositories>-->
 </project>
