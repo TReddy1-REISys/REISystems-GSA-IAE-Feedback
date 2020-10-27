@@ -1,4 +1,4 @@
-# Running locally
+# REI - Local development notes
 
 ## Application-local.properties
 In `src/app/main/resources/` add an `application-local.properties` file. Use the following as reference
@@ -33,3 +33,8 @@ mvn spring-boot:run -Dspring-boot.run.fork=false -Plocal
 Once running, swagger page can be accessed here:
 
 `http://localhost:8080/swagger-ui-custom.html`
+
+## Setting up when porting from GSA
+- update pom.xml
+    - point repositories away from gsa nexus
+    - strip out bsp platform-specific dependencies (heartbeat/audit-logging)
