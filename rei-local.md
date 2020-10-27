@@ -24,6 +24,12 @@ mail.protocol=smtp
 ```
 
 ## Runnning app
+Run app with this command (or IDE equivalent):
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.fork=false -Plocal
+```
+
 Once running, swagger page can be accessed here:
 
 `http://localhost:8080/swagger-ui-custom.html`
